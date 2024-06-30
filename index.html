@@ -5,8 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
+<style>
+    .disabled {
+    pointer-events: none;
+}
+</style>
 <body>
+    <div class="w-full h-screen flex items-center justify-center ">
+        <div class="flex flex-col ">
+         <div class="flex justify-center items-center text-3xl font-bold">
+             <p>SCORE: <span class="score text-blue-400"></span></p></div>
+         <div class="grid grid-cols-4 icon-container gap-1 mt-10">
+                    
+         </div>
+        </div>
+     </div>
+     
+ </body>
+ 
+ <script>
+     const score = document.querySelector('.score');
+     score.textContent = parseInt(0);
+      const icons = [  
+     {icon:"fa-solid fa-paper-plane"},
+     {icon:"fa-solid fa-bug"},
+     {icon:"fa-solid fa-cube"},
+     {icon:"fa-solid fa-cubes"},
+     {icon:"fa-solid fa-shield"},
+     {icon:"fa-solid fa-gear"},
+     {icon:"fa-solid fa-bath"},
+     {icon:"fa-solid fa-filter"}
+     ];
+     const itemContainer = document.querySelector('.icon-container');
+     
+     /* function to shuffle the icons */
+     function shuffleArray(array){
+   for (let i = array.length - 1; i > 0; i--) {
+     const j = Math.floor(Math.random() * (i + 1));
+     [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+   }
+   return array;
+ }
+     /* function to display the icons or boxes */
+     function displayBoxes(){
+     let iconHtml = '';
+     let doubleIcons = icons.concat(icons.map(icon => ({ ...icon })));// this doubles the icons 
+    doubleIcons = shuffleArray(doubleIcons);
+     /* to add ids */
+     
+        /* ended up figuring out addding id wasnt neccesary so i might remove it later idont know might leave em dont know if i need ids later */
+     
+ doubleIcons.forEach((icon)=>{
+     iconHtml +=
+     `
+      <div class="p-6 bg-blue-400 rounded-md game cursor-pointer transition-all duration-500" data-icon-id="${icon.id}">
+           <i class="${icon.icon} text-blue-400" data-icon-id="${icon.id}"></i>
+             </div>
+             `;          
+ })
+ itemContainer.innerHTML = iconHtml;
+ 
+   }  
+ 
+ displayBoxes();
+ 
+ let clickCount = 0;
+ let firstChildElementName;
+ let secondChildElementName;
+ let matchingIcons = null;
+ let firstGameElement;
+ let secondGameElement;
+ let isComparing = false;
+ 
+ function resetGameElements() {
+     firstChildElementName = null;
+     secondChildElementName = null;
+     firstGameElement = null;
+     secondGameElement = null;
+     clickCount = 0;
+     isComparing = false;
     
-</body>
+ }
+ /* function to remove blue background */
+ function removeBlue(gameElement){
+     if(gameElement){
+         const gameId = gameElement.dataset.iconId;//not needed now tho
+         gameElement.classList.remove('bg-blue-400');
+     }
+ }
+ /* the click event */
+ itemContainer.addEventListener('click', (e)=>{
+     if (isComparing) return;
+     const gameElement = e.target.closest('.game');
+     if (!gameElement  || gameElement.classList.contains('disabled')) return;
+         clickCount++;
+         console.log(clickCount)
+     const childElement = gameElement.querySelector('i');
+     if (!childElement) return;
+     const childElementName = childElement.className;
+     
+     //check above for the function
+     if(clickCount === 1){/* condition to get the classes of the selected icon */
+             firstChildElementName = childElementName;
+             firstGameElement = gameElement;
+             console.log(firstGameElement);
+             removeBlue(gameElement); 
+             firstGameElement.classList.add('disabled');
+             
+         }
+         else if(clickCount === 2){
+             secondChildElementName = childElementName;
+             secondGameElement = gameElement;
+             console.log(secondGameElement);
+             removeBlue(gameElement); 
+             secondGameElement.classList.add('disabled');
+         }
+        /*  isComparing = true; */
+ 
+             /* matching logic */
+         if(firstChildElementName && secondChildElementName){
+             isComparing = true;
+             console.log('Both child names are set:');
+             if(firstChildElementName === secondChildElementName){
+                 matchingIcons = true;
+               
+                 resetGameElements();
+             }
+             else{
+                 matchingIcons = false;
+                 setTimeout(()=>{
+                     firstGameElement.classList.add('bg-blue-400');
+                         secondGameElement.classList.add('bg-blue-400');
+                         firstGameElement.classList.remove('disabled');
+                         secondGameElement.classList.remove('disabled');
+                     resetGameElements();
+                 }, 500) 
+              }
+             console.log(matchingIcons);
+            
+         }
+        
+      else if(clickCount >= 2){
+          resetGameElements()
+     }
+     const gameMode = document.querySelectorAll('.game');
+ 
+ 
+ let scoreCount = parseInt(0);
+ 
+ const checkNoElementHasClass = (gameMode, className) =>{
+     return Array.from(gameMode).every( element => !element.classList.contains(className));
+ }
+ const noneHaveClass = checkNoElementHasClass(gameMode, 'bg-blue-400');
+ if(noneHaveClass){
+     scoreCount++;
+     score.textContent += scoreCount;
+     setTimeout(() => {
+                   iconHtml = ''; // Clear the existing HTML
+                   displayBoxes();// Redisplay the boxes
+             }, 1000); // Adjust       
+ }
+ console.log(scoreCount)
+ })
+ </script>
 </html>
